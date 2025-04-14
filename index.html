@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mein Chatbot</title>
+</head>
+<body>
+  <h1>Chat mit Lucifer 🤖</h1>
+  <div id="chat-fenster">
+    </div>
+  <input type="text" id="userInput" placeholder="Schreib etwas..." />
+  <button onclick="sendMessage()">Senden</button>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("userInput").value;
+      const chat = document.getElementById("chat-fenster");
+      chat.innerHTML += `<p><b>Du:</b> ${input}</p>`;
+      document.getElementById("userInput").value = "";
+
+      let antwort = "";
+      const kleineEingabe = input.toLowerCase();
+
+      if (kleineEingabe.includes("hallo") || kleineEingabe.includes("hi")) {
+        antwort = "Hallo! Wie kann ich dir helfen?";
+      } else if (kleineEingabe.includes("wie geht es dir")) {
+        antwort = "Mir geht es gut, danke der Nachfrage!";
+      } else if (kleineEingabe.includes("wie heißt du") || kleineEingabe.includes("dein name")) {
+        antwort = "Mein Name ist Lucifer. Manchmal wird der Name mit 'Lichtbringer' in Verbindung gebracht.";
+      } else if (kleineEingabe.includes("thw") || kleineEingabe.includes("technisches hilfswerk")) {
+        antwort = "Das Technische Hilfswerk (THW) ist eine Organisation in Deutschland, die bei Unglücksfällen und Notlagen hilft. Sie leisten tolle Arbeit, zum Beispiel bei Überschwemmungen, Unfällen oder wenn Menschen in Gefahr sind.";
+      } else {
+        antwort = "Das habe ich leider nicht verstanden.";
+      }
+
+      chat.innerHTML += `<p><b>Lucifer:</b> ${antwort}</p>`;
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function zeigeNachricht(absender, text) {
+      var chatFenster = document.getElementById("chat-fenster");
+      var neueNachricht = document.createElement("p");
+      neueNachricht.innerHTML = `<b>${absender}:</b> ${text}`;
+      chatFenster.appendChild(neueNachricht);
+      chatFenster.scrollTop = chatFenster.scrollHeight;
+    }
+  </script>
+</body>
+</html>
