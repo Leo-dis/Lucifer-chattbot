@@ -6,122 +6,135 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 15px;
-      background-color: #f4f4f4;
+      padding: 20px;
+      background-color: #1a1a1b; /* Dunkler Hintergrund */
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
       margin: 0;
+      color: #d1d5db; /* Helle Schriftfarbe */
     }
     h1 {
-      color: #333;
-      margin-bottom: 15px;
-      font-size: 1.5em;
+      color: #d1d5db;
+      margin-bottom: 20px;
+      font-size: 2em;
       text-align: center;
     }
     #chat-fenster {
-      background-color: #fff;
-      border: 1px solid #ddd;
-      padding: 10px;
-      margin-bottom: 15px;
+      background-color: #262729; /* Helleres Chatfenster */
+      border: 1px solid #384047;
+      padding: 15px;
+      margin-bottom: 20px;
       border-radius: 8px;
-      height: 60vh;
+      height: 70vh; /* Etwas höher */
       width: 95%;
-      max-width: 400px;
+      max-width: 600px; /* Etwas breiter für bessere Lesbarkeit */
       overflow-y: auto;
       display: flex;
       flex-direction: column;
     }
     .chat-nachricht {
-      padding: 8px 10px;
-      margin-bottom: 6px;
-      border-radius: 15px;
+      padding: 10px 15px;
+      margin-bottom: 8px;
+      border-radius: 20px;
       clear: both;
       max-width: 80%;
-      font-size: 0.9em;
+      font-size: 1em;
     }
     .du {
-      background-color: #e1f5fe;
-      color: #1976d2;
+      background-color: #343541; /* Farbe für Nutzernachrichten */
+      color: #fff;
       align-self: flex-end;
     }
     .lucifer {
-      background-color: #f1f8e9;
-      color: #388e3c;
+      background-color: #444654; /* Farbe für Bot-Nachrichten */
+      color: #d1d5db;
       align-self: flex-start;
     }
     .absender {
       font-weight: bold;
-      margin-right: 3px;
+      margin-right: 5px;
     }
     #eingabe-bereich {
       display: flex;
       width: 95%;
-      max-width: 400px;
-      margin-bottom: 10px;
+      max-width: 600px;
+      margin-bottom: 20px;
     }
     input[type="text"] {
       flex-grow: 1;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      margin-right: 5px;
+      padding: 12px;
+      border: 1px solid #384047;
+      border-radius: 8px;
+      margin-right: 10px;
       font-size: 1em;
+      background-color: #262729;
+      color: #d1d5db;
+    }
+    input[type="text"]::placeholder {
+      color: #a7b0b8;
     }
     button {
-      padding: 8px 12px;
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1em;
+      border-radius: 50%; /* Macht ihn rund */
+      width: 50px; /* Feste Breite */
+      height: 50px; /* Feste Höhe für einen Kreis */
+      padding: 0; /* Kein Innenpadding */
+      display: flex; /* Zum Zentrieren des Pfeils */
+      justify-content: center; /* Horizontal zentrieren */
+      align-items: center; /* Vertikal zentrieren */
+      text-align: center; /* Textausrichtung */
+      font-size: 1.5em; /* Größe des Pfeils */
+      line-height: 0; /* Hilft bei der vertikalen Ausrichtung */
+      background-color: #202123; /* Hintergrundfarbe des Buttons (passend zum ChatGPT-Stil) */
+      color: #fff; /* Farbe des Pfeils */
+      border: none; /* Keine Umrandung */
+      cursor: pointer; /* Mauszeiger ändert sich beim Überfahren */
     }
     button:hover {
-      background-color: #45a049;
+      background-color: #343541; /* Dunklere Farbe beim Überfahren */
     }
     #vorschlaege {
       text-align: center;
-      font-size: 0.8em;
-      color: #777;
-      margin-bottom: 10px;
+      font-size: 0.9em;
+      color: #a7b0b8;
+      margin-bottom: 15px;
     }
     #vorschlaege a {
-      color: #1976d2;
+      color: #6495ed; /* Eine hellere Farbe für die Vorschläge */
       text-decoration: none;
-      margin: 0 5px;
+      margin: 0 8px;
       cursor: pointer;
     }
     #ladeanzeige {
       text-align: center;
-      color: #777;
-      font-size: 0.9em;
-      margin-top: 5px;
+      color: #a7b0b8;
+      font-size: 1em;
+      margin-top: 10px;
       display: none; /* Anfangs versteckt */
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       h1 {
         font-size: 1.8em;
       }
       #chat-fenster {
-        height: 70vh;
-        width: 98%;
-        max-width: none;
+        height: 60vh;
+        max-width: 98%;
       }
       #eingabe-bereich {
-        width: 98%;
-        max-width: none;
+        max-width: 98%;
       }
       input[type="text"] {
-        font-size: 1.1em;
+        font-size: 1em;
       }
       button {
-        font-size: 1.1em;
+        font-size: 1em;
+        width: 40px;
+        height: 40px;
       }
       #vorschlaege {
-        font-size: 0.9em;
+        font-size: 0.8em;
       }
     }
   </style>
@@ -135,7 +148,7 @@
   </div>
   <div id="eingabe-bereich">
     <input type="text" id="userInput" placeholder="Schreibe etwas..." />
-    <button onclick="sendMessage()">Senden</button>
+    <button onclick="sendMessage()">➔</button>
   </div>
   <div id="ladeanzeige">Wird geladen...</div>
 
