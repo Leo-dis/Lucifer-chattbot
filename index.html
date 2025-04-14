@@ -150,6 +150,28 @@
       }
     });
 
+    async function getWordDefinition(word) {
+      const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`;
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          if (response.status === 404) {
+            return `"${word}" wurde nicht im Wörterbuch gefunden.`;
+          }
+          throw new Error(`Fehler beim Abrufen der Definition: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data && data[0] && data[0].meanings && data[0].meanings[0].definitions && data[0].meanings[0].definitions[0].definition) {
+          return `${word}: ${data[0].meanings[0].definitions[0].definition}`;
+        } else {
+          return `"${word}" konnte nicht definiert werden.`;
+        }
+      } catch (error) {
+        console.error("Fehler bei der Wörterbuch-API:", error);
+        return "Es gab ein Problem beim Nachschlagen der Definition.";
+      }
+    }
+
     async function sendMessage() {
       const input = userInput.value;
       zeigeNachricht("Du", input);
@@ -159,7 +181,10 @@
       let antwort = "";
       const kleineEingabe = input.toLowerCase();
 
-      if (kleineEingabe.includes("hallo") || kleineEingabe.includes("hi")) {
+      if (kleineEingabe.startsWith("was bedeutet ") || kleineEingabe.startsWith("definiere ")) {
+        const wort = kleineEingabe.substring(kleineEingabe.indexOf(" ") + 1).trim();
+        antwort = await getWordDefinition(wort);
+      } else if (kleineEingabe.includes("hallo") || kleineEingabe.includes("hi")) {
         antwort = "Hallo! Wie kann ich dir helfen?";
       } else if (kleineEingabe.includes("wie geht es dir")) {
         antwort = "Mir geht es gut, danke der Nachfrage!";
