@@ -2,6 +2,55 @@
 <html>
 <head>
   <title>Mein Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: red;
+    }
+    #chat-fenster {
+      height: 300px;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #f0f0f0;
+    }
+    .du {
+      color: blue;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px orange, -1px -1px 2px red;
+      color: white;
+      animation: flackern 1s infinite alternate;
+    }
+    .lucifer {
+      color: green;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px orange, -1px -1px 2px red;
+      color: white;
+      animation: flackern 1s infinite alternate;
+    }
+    @keyframes flackern {
+      from {
+        text-shadow: 1px 1px 2px orange, -1px -1px 2px red;
+      }
+      to {
+        text-shadow: 1px 1px 3px darkorange, -1px -1px 3px darkred;
+      }
+    }
+    input[type="text"] {
+      padding: 8px;
+      border: 1px solid #ccc;
+      width: 80%;
+    }
+    button {
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <h1>Chat mit Lucifer 🤖</h1>
@@ -14,7 +63,7 @@
     async function sendMessage() {
       const input = document.getElementById("userInput").value;
       const chat = document.getElementById("chat-fenster");
-      chat.innerHTML += `<p><b>Du:</b> ${input}</p>`;
+      chat.innerHTML += `<p class="du"><b>Du:</b> ${input}</p>`;
       document.getElementById("userInput").value = "";
 
       let antwort = "";
@@ -53,14 +102,14 @@
         antwort = "Das habe ich leider nicht verstanden.";
       }
 
-      chat.innerHTML += `<p><b>Lucifer:</b> ${antwort}</p>`;
+      chat.innerHTML += `<p class="lucifer"><b>Lucifer:</b> ${antwort}</p>`;
       chat.scrollTop = chat.scrollHeight;
     }
 
     function zeigeNachricht(absender, text) {
       var chatFenster = document.getElementById("chat-fenster");
       var neueNachricht = document.createElement("p");
-      neueNachricht.innerHTML = `<b>${absender}:</b> ${text}`;
+      neueNachricht.innerHTML = `<b class="${absender.toLowerCase()}">${absender}:</b> ${text}`;
       chatFenster.appendChild(neueNachricht);
       chatFenster.scrollTop = chatFenster.scrollHeight;
     }
