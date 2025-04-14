@@ -28,6 +28,27 @@
         antwort = "Mein Name ist Lucifer. Manchmal wird der Name mit 'Lichtbringer' in Verbindung gebracht.";
       } else if (kleineEingabe.includes("thw") || kleineEingabe.includes("technisches hilfswerk")) {
         antwort = "Das Technische Hilfswerk (THW) ist eine Organisation in Deutschland, die bei Unglücksfällen und Notlagen hilft. Sie leisten tolle Arbeit, zum Beispiel bei Überschwemmungen, Unfällen oder wenn Menschen in Gefahr sind.";
+      } else if (kleineEingabe.startsWith("suche nach")) {
+        const suchbegriff = kleineEingabe.substring("suche nach".length).trim();
+        const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(suchbegriff)}&format=json&pretty=1`;
+
+        try {
+          const antwortVomSuchServer = await fetch(apiUrl);
+          const suchErgebnisse = await antwortVomSuchServer.json();
+
+          if (suchErgebnisse.AbstractText) {
+            antwort = suchErgebnisse.AbstractText + (suchErgebnisse.AbstractSource ? ` (Quelle: ${suchErgebnisse.AbstractSource})` : "");
+          } else if (suchErgebnisse.RelatedTopics && suchErgebnisse.RelatedTopics.length > 0) {
+            antwort = "Hier sind einige verwandte Themen: ";
+            suchErgebnisse.RelatedTopics.slice(0, 3).forEach(topic => {
+              antwort += `${topic.Text}. `;
+            });
+          } else {
+            antwort = "Ich habe leider keine direkte Antwort oder verwandte Themen dazu gefunden.";
+          }
+        } catch (error) {
+          antwort = "Es gab ein Problem bei der Suche.";
+        }
       } else {
         antwort = "Das habe ich leider nicht verstanden.";
       }
