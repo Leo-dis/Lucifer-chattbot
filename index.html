@@ -2,10 +2,11 @@
 <html>
 <head>
   <title>Mein Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 15px; /* Etwas weniger Padding für kleinere Bildschirme */
+      padding: 15px;
       background-color: #f4f4f4;
       display: flex;
       flex-direction: column;
@@ -15,30 +16,30 @@
     }
     h1 {
       color: #333;
-      margin-bottom: 15px; /* Weniger Abstand nach der Überschrift */
-      font-size: 1.5em; /* Kleinere Schriftgröße für die Überschrift */
-      text-align: center; /* Überschrift zentrieren */
+      margin-bottom: 15px;
+      font-size: 1.5em;
+      text-align: center;
     }
     #chat-fenster {
       background-color: #fff;
       border: 1px solid #ddd;
-      padding: 10px; /* Weniger Padding im Chatfenster */
-      margin-bottom: 15px; /* Weniger Abstand darunter */
+      padding: 10px;
+      margin-bottom: 15px;
       border-radius: 8px;
-      height: 60vh; /* Nutzt einen größeren Teil der Bildschirmhöhe */
-      width: 95%; /* Nimmt fast die gesamte Bildschirmbreite ein */
-      max-width: 400px; /* Maximale Breite für größere Handys */
+      height: 60vh;
+      width: 95%;
+      max-width: 400px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
     }
     .chat-nachricht {
-      padding: 8px 10px; /* Weniger Padding in den Nachrichten */
-      margin-bottom: 6px; /* Weniger Abstand zwischen Nachrichten */
+      padding: 8px 10px;
+      margin-bottom: 6px;
       border-radius: 15px;
       clear: both;
-      max-width: 80%; /* Nachrichten dürfen etwas breiter sein auf kleinen Bildschirmen */
-      font-size: 0.9em; /* Kleinere Schriftgröße für Nachrichten */
+      max-width: 80%;
+      font-size: 0.9em;
     }
     .du {
       background-color: #e1f5fe;
@@ -52,53 +53,75 @@
     }
     .absender {
       font-weight: bold;
-      margin-right: 3px; /* Weniger Abstand zum Text */
+      margin-right: 3px;
     }
     #eingabe-bereich {
       display: flex;
-      width: 95%; /* Nimmt fast die gesamte Bildschirmbreite ein */
+      width: 95%;
       max-width: 400px;
+      margin-bottom: 10px;
     }
     input[type="text"] {
       flex-grow: 1;
-      padding: 8px; /* Weniger Padding im Eingabefeld */
+      padding: 8px;
       border: 1px solid #ddd;
       border-radius: 5px;
-      margin-right: 5px; /* Weniger Abstand zum Button */
-      font-size: 1em; /* Kleinere Schriftgröße im Eingabefeld */
+      margin-right: 5px;
+      font-size: 1em;
     }
     button {
-      padding: 8px 12px; /* Weniger Padding im Button */
+      padding: 8px 12px;
       background-color: #4caf50;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 1em; /* Kleinere Schriftgröße im Button */
+      font-size: 1em;
     }
     button:hover {
       background-color: #45a049;
     }
+    #vorschlaege {
+      text-align: center;
+      font-size: 0.8em;
+      color: #777;
+      margin-bottom: 10px;
+    }
+    #vorschlaege a {
+      color: #1976d2;
+      text-decoration: none;
+      margin: 0 5px;
+      cursor: pointer;
+    }
+    #ladeanzeige {
+      text-align: center;
+      color: #777;
+      font-size: 0.9em;
+      margin-top: 5px;
+      display: none; /* Anfangs versteckt */
+    }
 
-    /* Media Query für kleinere Bildschirme (z.B. Handys) */
     @media (max-width: 600px) {
       h1 {
-        font-size: 1.8em; /* Etwas größer auf sehr kleinen Bildschirmen */
+        font-size: 1.8em;
       }
       #chat-fenster {
-        height: 70vh; /* Noch mehr Höhe auf sehr kleinen Bildschirmen */
-        width: 98%; /* Noch breiter */
-        max-width: none; /* Keine maximale Breite */
+        height: 70vh;
+        width: 98%;
+        max-width: none;
       }
       #eingabe-bereich {
-        width: 98%; /* Noch breiter */
-        max-width: none; /* Keine maximale Breite */
+        width: 98%;
+        max-width: none;
       }
       input[type="text"] {
         font-size: 1.1em;
       }
       button {
         font-size: 1.1em;
+      }
+      #vorschlaege {
+        font-size: 0.9em;
       }
     }
   </style>
@@ -107,14 +130,19 @@
   <h1>Chat mit Lucifer 🤖</h1>
   <div id="chat-fenster">
     </div>
+  <div id="vorschlaege">
+    Frag mich z.B.: <a onclick="document.getElementById('userInput').value='Hallo'">Hallo</a> | <a onclick="document.getElementById('userInput').value='Suche nach Katzen'">Suche nach Katzen</a> | <a onclick="document.getElementById('userInput').value='Erzähl einen Witz'">Erzähl einen Witz</a>
+  </div>
   <div id="eingabe-bereich">
     <input type="text" id="userInput" placeholder="Schreibe etwas..." />
     <button onclick="sendMessage()">Senden</button>
   </div>
+  <div id="ladeanzeige">Wird geladen...</div>
 
   <script>
     const userInput = document.getElementById("userInput");
     const chatFenster = document.getElementById("chat-fenster");
+    const ladeanzeige = document.getElementById("ladeanzeige");
 
     userInput.addEventListener("keypress", function(event) {
       if (event.key === "Enter") {
@@ -126,6 +154,7 @@
       const input = userInput.value;
       zeigeNachricht("Du", input);
       userInput.value = "";
+      ladeanzeige.style.display = "block"; // Ladeanzeige anzeigen
 
       let antwort = "";
       const kleineEingabe = input.toLowerCase();
@@ -155,10 +184,40 @@
 
         try {
           const antwortVomSuchServer = await fetch(apiUrl);
+          if (!antwortVomSuchServer.ok) {
+            throw new Error(`HTTP error! status: ${antwortVomSuchServer.status}`);
+          }
           const suchErgebnisse = await antwortVomSuchServer.json();
 
           if (suchErgebnisse.AbstractText) {
             antwort = suchErgebnisse.AbstractText + (suchErgebnisse.AbstractSource ? ` (Quelle: ${suchErgebnisse.AbstractSource})` : "");
           } else if (suchErgebnisse.RelatedTopics && suchErgebnisse.RelatedTopics.length > 0) {
             antwort = "Hier sind einige verwandte Themen: ";
-            const
+            const listItems = suchErgebnisse.RelatedTopics.slice(0, 3).map(topic => `<li>${topic.Text}</li>`).join('');
+            antwort += `<ul>${listItems}</ul>`;
+          } else {
+            antwort = "Ich habe leider keine direkte Antwort oder verwandte Themen dazu gefunden.";
+          }
+        } catch (error) {
+          antwort = "Es gab ein Problem bei der Suche. Bitte versuche es später noch einmal.";
+          console.error("Fehler bei der DuckDuckGo-Suche:", error);
+        } finally {
+          ladeanzeige.style.display = "none"; // Ladeanzeige ausblenden
+        }
+      } else {
+        antwort = "Das habe ich leider nicht verstanden.";
+      }
+
+      zeigeNachricht("Lucifer", antwort);
+    }
+
+    function zeigeNachricht(absender, text) {
+      var neueNachricht = document.createElement("p");
+      neueNachricht.classList.add("chat-nachricht", absender.toLowerCase());
+      neueNachricht.innerHTML = `<span class="absender">${absender}:</span> ${text}`;
+      chatFenster.appendChild(neueNachricht);
+      chatFenster.scrollTop = chatFenster.scrollHeight;
+    }
+  </script>
+</body>
+</html>
