@@ -150,6 +150,31 @@
       }
     });
 
+    async function getWeather(city) {
+      const apiUrl = `https://wttr.in/${encodeURIComponent(city)}?format=j1`;
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          if (response.status === 404) {
+            return `Für "${city}" konnten keine Wetterdaten gefunden werden.`;
+          }
+          throw new Error(`Fehler beim Abrufen der Wetterdaten: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data && data.current_condition && data.current_condition[0]) {
+          const temperature = data.current_condition[0].temp_C;
+          const description = data.current_condition[0].weatherDesc[0].value;
+          const humidity = data.current_condition[0].humidity;
+          return `Das Wetter in ${city}: ${temperature}°C, ${description}. Die Luftfeuchtigkeit beträgt ${humidity}%.`;
+        } else {
+          return `Die Wetterdaten für "${city}" konnten nicht verarbeitet werden.`;
+        }
+      } catch (error) {
+        console.error("Fehler bei der Wetter-API:", error);
+        return "Es gab ein Problem beim Abrufen der Wetterdaten.";
+      }
+    }
+
     async function getWordDefinition(word) {
       const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`;
       try {
@@ -181,7 +206,10 @@
       let antwort = "";
       const kleineEingabe = input.toLowerCase();
 
-      if (kleineEingabe.startsWith("was bedeutet ") || kleineEingabe.startsWith("definiere ")) {
+      if (kleineEingabe.startsWith("wie ist das wetter in ")) {
+        const stadt = kleineEingabe.substring("wie ist das wetter in ".length).trim();
+        antwort = await getWeather(stadt);
+      } else if (kleineEingabe.startsWith("was bedeutet ") || kleineEingabe.startsWith("definiere ")) {
         const wort = kleineEingabe.substring(kleineEingabe.indexOf(" ") + 1).trim();
         antwort = await getWordDefinition(wort);
       } else if (kleineEingabe.includes("hallo") || kleineEingabe.includes("hi")) {
