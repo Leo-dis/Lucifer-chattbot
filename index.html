@@ -4,48 +4,48 @@
   <title>Mein Chatbot</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Moderne Schriftart */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding: 20px;
-      background-color: #f4f4f4; /* Heller, moderner Hintergrund */
+      background-color: #f4f4f4;
       display: flex;
       flex-direction: column;
-      align-items: center; /* Zentriert den Chatbereich horizontal */
-      min-height: 100vh; /* Sorgt dafür, dass der Hintergrund den ganzen Bildschirm füllt */
+      align-items: center;
+      min-height: 100vh;
       margin: 0;
     }
     h1 {
-      color: #333; /* Dunkelgraue Überschrift */
+      color: #333;
       margin-bottom: 20px;
     }
     #chat-fenster {
-      background-color: #fff; /* Weißer Hintergrund für das Chatfenster */
-      border: 1px solid #ddd; /* Hellgrauer Rahmen */
+      background-color: #fff;
+      border: 1px solid #ddd;
       padding: 15px;
       margin-bottom: 20px;
-      border-radius: 8px; /* Abgerundete Ecken */
-      height: 400px; /* Etwas höher für mehr Platz */
-      width: 80%; /* Nimmt einen größeren Teil der Bildschirmbreite ein */
-      max-width: 600px; /* Maximale Breite für größere Bildschirme */
-      overflow-y: auto; /* Scrollen, wenn der Inhalt zu lang wird */
+      border-radius: 8px;
+      height: 400px;
+      width: 80%;
+      max-width: 600px;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
     }
     .chat-nachricht {
       padding: 10px 12px;
       margin-bottom: 10px;
-      border-radius: 15px; /* Stärkere Abrundung für Sprechblasen-Effekt */
+      border-radius: 15px;
       clear: both;
-      max-width: 70%; /* Nachrichten nicht zu breit machen */
+      max-width: 70%;
     }
     .du {
-      background-color: #e1f5fe; /* Sehr hellblau für Nutzer */
-      color: #1976d2; /* Dunkleres Blau für Text */
-      align-self: flex-end; /* Rechts ausrichten */
+      background-color: #e1f5fe;
+      color: #1976d2;
+      align-self: flex-end;
     }
     .lucifer {
-      background-color: #f1f8e9; /* Sehr hellgrün für Bot */
-      color: #388e3c; /* Dunkleres Grün für Text */
-      align-self: flex-start; /* Links ausrichten */
+      background-color: #f1f8e9;
+      color: #388e3c;
+      align-self: flex-start;
     }
     .absender {
       font-weight: bold;
@@ -66,7 +66,7 @@
     }
     button {
       padding: 10px 15px;
-      background-color: #4caf50; /* Modernes Grün für Senden */
+      background-color: #4caf50;
       color: white;
       border: none;
       border-radius: 5px;
@@ -74,7 +74,7 @@
       font-size: 16px;
     }
     button:hover {
-      background-color: #45a049; /* Dunkleres Grün bei Hover */
+      background-color: #45a049;
     }
   </style>
 </head>
@@ -88,11 +88,19 @@
   </div>
 
   <script>
+    const userInput = document.getElementById("userInput");
+
+    userInput.addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
     async function sendMessage() {
-      const input = document.getElementById("userInput").value;
+      const input = userInput.value;
       const chatFenster = document.getElementById("chat-fenster");
       zeigeNachricht("Du", input);
-      document.getElementById("userInput").value = "";
+      userInput.value = "";
 
       let antwort = "";
       const kleineEingabe = input.toLowerCase();
