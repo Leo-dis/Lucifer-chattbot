@@ -5,7 +5,7 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 20px;
+      padding: 15px; /* Etwas weniger Padding für kleinere Bildschirme */
       background-color: #f4f4f4;
       display: flex;
       flex-direction: column;
@@ -15,27 +15,30 @@
     }
     h1 {
       color: #333;
-      margin-bottom: 20px;
+      margin-bottom: 15px; /* Weniger Abstand nach der Überschrift */
+      font-size: 1.5em; /* Kleinere Schriftgröße für die Überschrift */
+      text-align: center; /* Überschrift zentrieren */
     }
     #chat-fenster {
       background-color: #fff;
       border: 1px solid #ddd;
-      padding: 15px;
-      margin-bottom: 20px;
+      padding: 10px; /* Weniger Padding im Chatfenster */
+      margin-bottom: 15px; /* Weniger Abstand darunter */
       border-radius: 8px;
-      height: 400px;
-      width: 80%;
-      max-width: 600px;
+      height: 60vh; /* Nutzt einen größeren Teil der Bildschirmhöhe */
+      width: 95%; /* Nimmt fast die gesamte Bildschirmbreite ein */
+      max-width: 400px; /* Maximale Breite für größere Handys */
       overflow-y: auto;
       display: flex;
       flex-direction: column;
     }
     .chat-nachricht {
-      padding: 10px 12px;
-      margin-bottom: 10px;
+      padding: 8px 10px; /* Weniger Padding in den Nachrichten */
+      margin-bottom: 6px; /* Weniger Abstand zwischen Nachrichten */
       border-radius: 15px;
       clear: both;
-      max-width: 70%;
+      max-width: 80%; /* Nachrichten dürfen etwas breiter sein auf kleinen Bildschirmen */
+      font-size: 0.9em; /* Kleinere Schriftgröße für Nachrichten */
     }
     .du {
       background-color: #e1f5fe;
@@ -49,32 +52,54 @@
     }
     .absender {
       font-weight: bold;
-      margin-right: 5px;
+      margin-right: 3px; /* Weniger Abstand zum Text */
     }
     #eingabe-bereich {
       display: flex;
-      width: 80%;
-      max-width: 600px;
+      width: 95%; /* Nimmt fast die gesamte Bildschirmbreite ein */
+      max-width: 400px;
     }
     input[type="text"] {
       flex-grow: 1;
-      padding: 10px;
+      padding: 8px; /* Weniger Padding im Eingabefeld */
       border: 1px solid #ddd;
       border-radius: 5px;
-      margin-right: 10px;
-      font-size: 16px;
+      margin-right: 5px; /* Weniger Abstand zum Button */
+      font-size: 1em; /* Kleinere Schriftgröße im Eingabefeld */
     }
     button {
-      padding: 10px 15px;
+      padding: 8px 12px; /* Weniger Padding im Button */
       background-color: #4caf50;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 1em; /* Kleinere Schriftgröße im Button */
     }
     button:hover {
       background-color: #45a049;
+    }
+
+    /* Media Query für kleinere Bildschirme (z.B. Handys) */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8em; /* Etwas größer auf sehr kleinen Bildschirmen */
+      }
+      #chat-fenster {
+        height: 70vh; /* Noch mehr Höhe auf sehr kleinen Bildschirmen */
+        width: 98%; /* Noch breiter */
+        max-width: none; /* Keine maximale Breite */
+      }
+      #eingabe-bereich {
+        width: 98%; /* Noch breiter */
+        max-width: none; /* Keine maximale Breite */
+      }
+      input[type="text"] {
+        font-size: 1.1em;
+      }
+      button {
+        font-size: 1.1em;
+      }
     }
   </style>
 </head>
@@ -89,6 +114,7 @@
 
   <script>
     const userInput = document.getElementById("userInput");
+    const chatFenster = document.getElementById("chat-fenster");
 
     userInput.addEventListener("keypress", function(event) {
       if (event.key === "Enter") {
@@ -98,7 +124,6 @@
 
     async function sendMessage() {
       const input = userInput.value;
-      const chatFenster = document.getElementById("chat-fenster");
       zeigeNachricht("Du", input);
       userInput.value = "";
 
@@ -136,29 +161,4 @@
             antwort = suchErgebnisse.AbstractText + (suchErgebnisse.AbstractSource ? ` (Quelle: ${suchErgebnisse.AbstractSource})` : "");
           } else if (suchErgebnisse.RelatedTopics && suchErgebnisse.RelatedTopics.length > 0) {
             antwort = "Hier sind einige verwandte Themen: ";
-            const listItems = suchErgebnisse.RelatedTopics.slice(0, 3).map(topic => `<li>${topic.Text}</li>`).join('');
-            antwort += `<ul>${listItems}</ul>`;
-          } else {
-            antwort = "Ich habe leider keine direkte Antwort oder verwandte Themen dazu gefunden.";
-          }
-        } catch (error) {
-          antwort = "Es gab ein Problem bei der Suche.";
-        }
-      } else {
-        antwort = "Das habe ich leider nicht verstanden.";
-      }
-
-      zeigeNachricht("Lucifer", antwort);
-    }
-
-    function zeigeNachricht(absender, text) {
-      var chatFenster = document.getElementById("chat-fenster");
-      var neueNachricht = document.createElement("p");
-      neueNachricht.classList.add("chat-nachricht", absender.toLowerCase());
-      neueNachricht.innerHTML = `<span class="absender">${absender}:</span> ${text}`;
-      chatFenster.appendChild(neueNachricht);
-      chatFenster.scrollTop = chatFenster.scrollHeight;
-    }
-  </script>
-</body>
-</html>
+            const
