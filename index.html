@@ -4,75 +4,93 @@
   <title>Mein Chatbot</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Moderne Schriftart */
       padding: 20px;
-      background-color: red;
+      background-color: #f4f4f4; /* Heller, moderner Hintergrund */
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Zentriert den Chatbereich horizontal */
+      min-height: 100vh; /* Sorgt dafür, dass der Hintergrund den ganzen Bildschirm füllt */
+      margin: 0;
+    }
+    h1 {
+      color: #333; /* Dunkelgraue Überschrift */
+      margin-bottom: 20px;
     }
     #chat-fenster {
-      height: 300px;
-      overflow-y: scroll;
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-bottom: 10px;
-      background-color: #f0f0f0;
-      display: flex; /* Enable flexbox for chat messages */
-      flex-direction: column; /* Arrange messages in a column */
+      background-color: #fff; /* Weißer Hintergrund für das Chatfenster */
+      border: 1px solid #ddd; /* Hellgrauer Rahmen */
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px; /* Abgerundete Ecken */
+      height: 400px; /* Etwas höher für mehr Platz */
+      width: 80%; /* Nimmt einen größeren Teil der Bildschirmbreite ein */
+      max-width: 600px; /* Maximale Breite für größere Bildschirme */
+      overflow-y: auto; /* Scrollen, wenn der Inhalt zu lang wird */
+      display: flex;
+      flex-direction: column;
     }
     .chat-nachricht {
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      border-radius: 10px;
-      clear: both; /* Prevent floating issues */
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border-radius: 15px; /* Stärkere Abrundung für Sprechblasen-Effekt */
+      clear: both;
+      max-width: 70%; /* Nachrichten nicht zu breit machen */
     }
     .du {
-      background-color: #e0f7fa; /* Light cyan for user messages */
-      color: blue;
-      align-self: flex-end; /* Align user messages to the right */
-      text-shadow: 1px 1px 2px orange, -1px -1px 2px red;
-      color: white;
-      animation: flackern 1s infinite alternate;
+      background-color: #e1f5fe; /* Sehr hellblau für Nutzer */
+      color: #1976d2; /* Dunkleres Blau für Text */
+      align-self: flex-end; /* Rechts ausrichten */
     }
     .lucifer {
-      background-color: #f0fff0; /* Light green for bot messages */
-      color: green;
-      align-self: flex-start; /* Align bot messages to the left */
-      text-shadow: 1px 1px 2px orange, -1px -1px 2px red;
-      color: white;
-      animation: flackern 1s infinite alternate;
+      background-color: #f1f8e9; /* Sehr hellgrün für Bot */
+      color: #388e3c; /* Dunkleres Grün für Text */
+      align-self: flex-start; /* Links ausrichten */
     }
-    @keyframes flackern {
-      from {
-        text-shadow: 1px 1px 2px orange, -1px -1px 2px red;
-      }
-      to {
-        text-shadow: 1px 1px 3px darkorange, -1px -1px 3px darkred;
-      }
+    .absender {
+      font-weight: bold;
+      margin-right: 5px;
+    }
+    #eingabe-bereich {
+      display: flex;
+      width: 80%;
+      max-width: 600px;
     }
     input[type="text"] {
-      padding: 8px;
-      border: 1px solid #ccc;
-      width: 80%;
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-right: 10px;
+      font-size: 16px;
     }
     button {
-      padding: 8px 15px;
-      background-color: #007bff;
+      padding: 10px 15px;
+      background-color: #4caf50; /* Modernes Grün für Senden */
       color: white;
       border: none;
+      border-radius: 5px;
       cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #45a049; /* Dunkleres Grün bei Hover */
     }
   </style>
 </head>
 <body>
-  <h1>Chat mit Lucifer 😈</h1>
+  <h1>Chat mit Lucifer 🤖</h1>
   <div id="chat-fenster">
     </div>
-  <input type="text" id="userInput" placeholder="Schreib etwas..." />
-  <button onclick="sendMessage()">Senden</button>
+  <div id="eingabe-bereich">
+    <input type="text" id="userInput" placeholder="Schreibe etwas..." />
+    <button onclick="sendMessage()">Senden</button>
+  </div>
 
   <script>
     async function sendMessage() {
       const input = document.getElementById("userInput").value;
-      const chat = document.getElementById("chat-fenster");
+      const chatFenster = document.getElementById("chat-fenster");
       zeigeNachricht("Du", input);
       document.getElementById("userInput").value = "";
 
@@ -84,18 +102,18 @@
       } else if (kleineEingabe.includes("wie geht es dir")) {
         antwort = "Mir geht es gut, danke der Nachfrage!";
       } else if (kleineEingabe.includes("wie heißt du") || kleineEingabe.includes("dein name")) {
-        antwort = "Mein Name ist Lucifer. Manchmal wird der Name mit 'Lichtbringer' in Verbindung gebracht.";
+        antwort = "Mein Name ist Lucifer.";
       } else if (kleineEingabe.includes("thw") || kleineEingabe.includes("technisches hilfswerk")) {
-        antwort = "Das Technische Hilfswerk (THW) ist eine Organisation in Deutschland, die bei Unglücksfällen und Notlagen hilft. Sie leisten tolle Arbeit, zum Beispiel bei Überschwemmungen, Unfällen oder wenn Menschen in Gefahr sind.";
+        antwort = "Das Technische Hilfswerk (THW) ist eine Organisation, die in Deutschland bei Notfällen hilft.";
       } else if (kleineEingabe.includes("wie alt bist du")) {
-        antwort = "Ich bin ein Programm, daher habe ich kein Alter im menschlichen Sinne.";
+        antwort = "Ich bin ein Computerprogramm, daher habe ich kein Alter.";
       } else if (kleineEingabe.includes("was ist dein lieblingsbuch")) {
-        antwort = "Als KI habe ich keine persönlichen Vorlieben wie Lieblingsbücher, aber ich habe Zugang zu einer riesigen Menge an Texten!";
+        antwort = "Ich lese keine Bücher auf die gleiche Weise wie Menschen, aber ich habe Zugriff auf viele Informationen!";
       } else if (kleineEingabe.includes("erzähl einen witz")) {
         const witze = [
-          "Warum hat der Fisch geweint? Weil sein ganzes Leben sinnlos war. 😄",
-          "Was sagt ein trauriger Keks? Ich fühle mich aber bröselig.",
-          "Warum gehen Bäume nicht in die Disco? Weil sie Wurzeln haben."
+          "Warum ist der Himmel so blau? Weil die Wolken rot werden vor Wut!",
+          "Was ist grün und rennt durch den Wald? Ein Rudel Salat!",
+          "Zwei Fische schwimmen im Meer. Sagt der eine: 'Hallo, wie geht es dir?' Antwortet der andere: 'Wo ist denn hier Wasser?'"
         ];
         antwort = witze[Math.floor(Math.random() * witze.length)];
       } else if (kleineEingabe.startsWith("suche nach")) {
@@ -129,7 +147,7 @@
       var chatFenster = document.getElementById("chat-fenster");
       var neueNachricht = document.createElement("p");
       neueNachricht.classList.add("chat-nachricht", absender.toLowerCase());
-      neueNachricht.innerHTML = `<b>${absender}:</b> ${text}`;
+      neueNachricht.innerHTML = `<span class="absender">${absender}:</span> ${text}`;
       chatFenster.appendChild(neueNachricht);
       chatFenster.scrollTop = chatFenster.scrollHeight;
     }
