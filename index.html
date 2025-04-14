@@ -15,17 +15,27 @@
       padding: 10px;
       margin-bottom: 10px;
       background-color: #f0f0f0;
+      display: flex; /* Enable flexbox for chat messages */
+      flex-direction: column; /* Arrange messages in a column */
+    }
+    .chat-nachricht {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      clear: both; /* Prevent floating issues */
     }
     .du {
+      background-color: #e0f7fa; /* Light cyan for user messages */
       color: blue;
-      font-weight: bold;
+      align-self: flex-end; /* Align user messages to the right */
       text-shadow: 1px 1px 2px orange, -1px -1px 2px red;
       color: white;
       animation: flackern 1s infinite alternate;
     }
     .lucifer {
+      background-color: #f0fff0; /* Light green for bot messages */
       color: green;
-      font-weight: bold;
+      align-self: flex-start; /* Align bot messages to the left */
       text-shadow: 1px 1px 2px orange, -1px -1px 2px red;
       color: white;
       animation: flackern 1s infinite alternate;
@@ -63,7 +73,7 @@
     async function sendMessage() {
       const input = document.getElementById("userInput").value;
       const chat = document.getElementById("chat-fenster");
-      chat.innerHTML += `<p class="du"><b>Du:</b> ${input}</p>`;
+      zeigeNachricht("Du", input);
       document.getElementById("userInput").value = "";
 
       let antwort = "";
@@ -77,6 +87,17 @@
         antwort = "Mein Name ist Lucifer. Manchmal wird der Name mit 'Lichtbringer' in Verbindung gebracht.";
       } else if (kleineEingabe.includes("thw") || kleineEingabe.includes("technisches hilfswerk")) {
         antwort = "Das Technische Hilfswerk (THW) ist eine Organisation in Deutschland, die bei Unglücksfällen und Notlagen hilft. Sie leisten tolle Arbeit, zum Beispiel bei Überschwemmungen, Unfällen oder wenn Menschen in Gefahr sind.";
+      } else if (kleineEingabe.includes("wie alt bist du")) {
+        antwort = "Ich bin ein Programm, daher habe ich kein Alter im menschlichen Sinne.";
+      } else if (kleineEingabe.includes("was ist dein lieblingsbuch")) {
+        antwort = "Als KI habe ich keine persönlichen Vorlieben wie Lieblingsbücher, aber ich habe Zugang zu einer riesigen Menge an Texten!";
+      } else if (kleineEingabe.includes("erzähl einen witz")) {
+        const witze = [
+          "Warum hat der Fisch geweint? Weil sein ganzes Leben sinnlos war. 😄",
+          "Was sagt ein trauriger Keks? Ich fühle mich aber bröselig.",
+          "Warum gehen Bäume nicht in die Disco? Weil sie Wurzeln haben."
+        ];
+        antwort = witze[Math.floor(Math.random() * witze.length)];
       } else if (kleineEingabe.startsWith("suche nach")) {
         const suchbegriff = kleineEingabe.substring("suche nach".length).trim();
         const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(suchbegriff)}&format=json&pretty=1`;
@@ -89,9 +110,8 @@
             antwort = suchErgebnisse.AbstractText + (suchErgebnisse.AbstractSource ? ` (Quelle: ${suchErgebnisse.AbstractSource})` : "");
           } else if (suchErgebnisse.RelatedTopics && suchErgebnisse.RelatedTopics.length > 0) {
             antwort = "Hier sind einige verwandte Themen: ";
-            suchErgebnisse.RelatedTopics.slice(0, 3).forEach(topic => {
-              antwort += `${topic.Text}. `;
-            });
+            const listItems = suchErgebnisse.RelatedTopics.slice(0, 3).map(topic => `<li>${topic.Text}</li>`).join('');
+            antwort += `<ul>${listItems}</ul>`;
           } else {
             antwort = "Ich habe leider keine direkte Antwort oder verwandte Themen dazu gefunden.";
           }
@@ -102,14 +122,14 @@
         antwort = "Das habe ich leider nicht verstanden.";
       }
 
-      chat.innerHTML += `<p class="lucifer"><b>Lucifer:</b> ${antwort}</p>`;
-      chat.scrollTop = chat.scrollHeight;
+      zeigeNachricht("Lucifer", antwort);
     }
 
     function zeigeNachricht(absender, text) {
       var chatFenster = document.getElementById("chat-fenster");
       var neueNachricht = document.createElement("p");
-      neueNachricht.innerHTML = `<b class="${absender.toLowerCase()}">${absender}:</b> ${text}`;
+      neueNachricht.classList.add("chat-nachricht", absender.toLowerCase());
+      neueNachricht.innerHTML = `<b>${absender}:</b> ${text}`;
       chatFenster.appendChild(neueNachricht);
       chatFenster.scrollTop = chatFenster.scrollHeight;
     }
