@@ -269,34 +269,36 @@
           "Zwei Fische schwimmen im Meer. Sagt der eine: 'Hallo, wie geht es dir?' Antwortet der andere: 'Wo ist denn hier Wasser?'"
         ];
         antwort = witze[Math.floor(Math.random() * witze.length)];
-      } else if (kleineEingabe.startsWith("suche nach")) {
-        const suchbegriff = kleineEingabe.substring("suche nach".length).trim();
-        const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(suchbegriff)}&format=json&pretty=1`;
+      } else {
+        // **Neuer Teil für OpenAI:**
+        const openaiApiKey = "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"; // Hier ist dein API Key!
+        const openaiApiUrl = "https://api.openai.com/v1/chat/completions"; // Beispiel-Endpunkt
 
         try {
-          const antwortVomSuchServer = await fetch(apiUrl);
-          if (!antwortVomSuchServer.ok) {
-            throw new Error(`HTTP error! status: ${antwortVomSuchServer.status}`);
-          }
-          const suchErgebnisse = await antwortVomSuchServer.json();
+          const response = await fetch(openaiApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${openaiApiKey}`
+            },
+            body: JSON.stringify({
+              model: "gpt-3.5-turbo", // Oder ein anderes Modell
+              messages: [{ role: "user", content: input }],
+            }),
+          });
 
-          if (suchErgebnisse.AbstractText) {
-            antwort = suchErgebnisse.AbstractText + (suchErgebnisse.AbstractSource ? ` (Quelle: ${suchergebnisse.AbstractSource})` : "");
-          } else if (suchErgebnisse.RelatedTopics && suchErgebnisse.RelatedTopics.length > 0) {
-            antwort = "Hier sind einige verwandte Themen: ";
-            const listItems = suchErgebnisse.RelatedTopics.slice(0, 3).map(topic => `<li>${topic.Text}</li>`).join('');
-            antwort += `<ul>${listItems}</ul>`;
-          } else {
-            antwort = "Ich habe leider keine direkte Antwort oder verwandte Themen dazu gefunden.";
+          if (!response.ok) {
+            throw new Error(`OpenAI API Fehler: ${response.status}`);
           }
+
+          const data = await response.json();
+          antwort = data.choices[0].message.content; // Die Antwort von OpenAI
         } catch (error) {
-          antwort = "Es gab ein Problem bei der Suche. Bitte versuche es später noch einmal.";
-          console.error("Fehler bei der DuckDuckGo-Suche:", error);
+          console.error("Fehler bei der OpenAI API:", error);
+          antwort = "Es gab ein Problem bei der Kommunikation mit der KI.";
         } finally {
           ladeanzeige.style.display = "none"; // Ladeanzeige ausblenden
         }
-      } else {
-        antwort = "Das habe ich leider nicht verstanden.";
       }
 
       zeigeNachricht("Lucifer", antwort);
