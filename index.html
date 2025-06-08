@@ -125,9 +125,10 @@
     </div>
 
     <script>
-        // --- Datenstrukturen für neue Funktionen ---
-        let merkzettel = []; // Für Punkt 4 (Listen)
-        let erinnerungen = []; // Für Punkt 6 (Erinnerungen)
+        // --- Datenstrukturen für Funktionen ---
+        let merkzettel = []; // Für die Merkliste
+        let erinnerungen = []; // Für die Erinnerungsfunktion
+        let letzteNutzerNachricht = ""; // Für die Spiegel-Funktion
 
         // Hilfsfunktion für XSS-Prävention
         function escapeHtml(text) {
@@ -139,9 +140,18 @@
 
         // Antwortregeln modularisiert für bessere Wartbarkeit
         const antwortRegeln = [
+            // --- Basis-Begrüßungen und Informationen ---
             {
                 test: input => /hallo|hi|guten tag/i.test(input),
-                antwort: () => "Hallo! Es ist angenehm, dich zu begrüßen. Wie kann ich dir heute behilflich sein oder womit darf ich dich erleuchten?"
+                antwort: () => {
+                    const begruessungen = [
+                        "Hallo! Es ist angenehm, dich zu begrüßen. Wie kann ich dir heute behilflich sein oder womit darf ich dich erleuchten?",
+                        "Sei gegrüßt! Ich bin Lucifer, dein digitaler Begleiter. Was führt dich her?",
+                        "Ah, ein neues Gespräch. Herzlich willkommen! Was beschäftigt deinen Geist?",
+                        "Hallo! Ich bin bereit. Was möchtest du wissen oder tun?"
+                    ];
+                    return begruessungen[Math.floor(Math.random() * begruessungen.length)];
+                }
             },
             {
                 test: input => /wie geht es dir/i.test(input),
@@ -160,7 +170,7 @@
             },
             {
                 test: input => /was kannst du tun|deine fähigkeiten/i.test(input),
-                antwort: () => "Ich kann auf eine Vielzahl von Fragen antworten, Fakten nachschlagen (dank der DuckDuckGo-Suche), Witze erzählen und einfache Konversationen führen. Frag mich zum Beispiel nach einem Witz oder fordere mich auf, etwas für dich zu suchen."
+                antwort: () => "Ich kann auf eine Vielzahl von Fragen antworten, Fakten nachschlagen (dank der DuckDuckGo-Suche), Witze erzählen, Listen führen, Erinnerungen speichern, einfache Rechenaufgaben lösen und vieles mehr. Frag mich zum Beispiel nach einem Witz oder bitte mich, etwas für dich zu suchen."
             },
             {
                 test: input => /wie alt bist du/i.test(input),
@@ -226,7 +236,8 @@
                     return wetterOptionen[Math.floor(Math.random() * wetterOptionen.length)];
                 }
             },
-            // --- Rechenaufgaben ---
+            
+            // --- Rechenaufgaben (Punkt 3) ---
             {
                 test: input => /was ist (\d+)\s*plus\s*(\d+)/i.test(input),
                 antwort: (input) => {
@@ -264,7 +275,8 @@
                     return `${num1} / ${num2} = ${num1 / num2}`;
                 }
             },
-            // --- Listen ---
+
+            // --- Listen (Punkt 4) ---
             {
                 test: input => /merke (.*)|füge (.*) zur liste hinzu/i.test(input),
                 antwort: (input) => {
@@ -301,7 +313,8 @@
                     return "Deine Merkliste ist bereits leer.";
                 }
             },
-            // --- Countdown ---
+
+            // --- Countdown (Punkt 5) ---
             {
                 test: input => /countdown zu (\d{1,2})\.(\d{1,2})\.(\d{4})/i.test(input),
                 antwort: (input) => {
@@ -332,7 +345,8 @@
                     }
                 }
             },
-            // --- Erinnerungen ---
+
+            // --- Erinnerungen (Punkt 6) ---
             {
                 test: input => /erinnere mich an (.*) am (\d{1,2})\.(\d{1,2})\.(\d{4})( um (\d{1,2}:\d{2}))?/i.test(input),
                 antwort: (input) => {
@@ -403,12 +417,132 @@
                     return "Ich habe nicht verstanden, welche Erinnerung gelöscht werden soll. Sag 'lösche Erinnerung [Nummer]' oder 'lösche alle Erinnerungen'.";
                 }
             },
-            // --- Angepasste Suchregel (NEU!) ---
+
+            // --- Zufallsgenerator / Würfeln (Punkt 1) ---
+            {
+                test: input => /würfel( mit (\d+) seiten)?/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/würfel( mit (\d+) seiten)?/i);
+                    let max = 6; // Standard: 6-seitiger Würfel
+                    if (match[2]) {
+                        max = parseInt(match[2]);
+                        if (isNaN(max) || max <= 0) {
+                            return "Bitte gib eine gültige Anzahl von Seiten an (z.B. 'würfel mit 20 seiten').";
+                        }
+                    }
+                    const result = Math.floor(Math.random() * max) + 1;
+                    return `Du hast eine ${result} gewürfelt (von ${max} Seiten).`;
+                }
+            },
+            {
+                test: input => /zufallszahl zwischen (\d+) und (\d+)/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/zufallszahl zwischen (\d+) und (\d+)/i);
+                    const min = parseInt(match[1]);
+                    const max = parseInt(match[2]);
+                    if (isNaN(min) || isNaN(max) || min > max) {
+                        return "Bitte gib zwei gültige Zahlen an (z.B. 'Zufallszahl zwischen 1 und 100').";
+                    }
+                    const result = Math.floor(Math.random() * (max - min + 1)) + min;
+                    return `Deine Zufallszahl ist ${result}.`;
+                }
+            },
+            {
+                test: input => /zieh eine karte/i.test(input),
+                antwort: () => {
+                    const farben = ["Kreuz", "Pik", "Herz", "Karo"];
+                    const werte = ["Ass", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Bube", "Dame", "König"];
+                    const farbe = farben[Math.floor(Math.random() * farben.length)];
+                    const wert = werte[Math.floor(Math.random() * werte.length)];
+                    return `Du hast ${wert} ${farbe} gezogen.`;
+                }
+            },
+
+            // --- Einfache Textmanipulation (Punkt 2) ---
+            {
+                test: input => /schreib '(.*)' rückwärts/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/schreib '(.*)' rückwärts/i);
+                    const text = match[1];
+                    if (!text) return "Welchen Text soll ich rückwärts schreiben?";
+                    return `Rückwärts: ${escapeHtml(text.split('').reverse().join(''))}`;
+                }
+            },
+            {
+                test: input => /mach '(.*)' groß/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/mach '(.*)' groß/i);
+                    const text = match[1];
+                    if (!text) return "Welchen Text soll ich groß schreiben?";
+                    return `Großbuchstaben: ${escapeHtml(text.toUpperCase())}`;
+                }
+            },
+            {
+                test: input => /mach '(.*)' klein/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/mach '(.*)' klein/i);
+                    const text = match[1];
+                    if (!text) return "Welchen Text soll ich klein schreiben?";
+                    return `Kleinbuchstaben: ${escapeHtml(text.toLowerCase())}`;
+                }
+            },
+
+            // --- Anekdoten / Fun Facts (Punkt 3) ---
+            {
+                test: input => /erzähl mir einen fun fact|wusstest du schon/i.test(input),
+                antwort: () => {
+                    const funFacts = [
+                        "Wusstest du, dass die Erde in 24 Stunden eine Strecke von rund 40.000 Kilometern am Äquator zurücklegt?",
+                        "Der Pazifische Ozean ist so groß, dass alle Landmassen der Erde darin Platz finden würden.",
+                        "Honig verdirbt nie. Archäologen haben in ägyptischen Gräbern Honig gefunden, der über 3.000 Jahre alt und immer noch essbar war.",
+                        "Ein Goldfisch kann sich nur drei Sekunden lang an etwas erinnern. (Das stimmt übrigens nicht, es ist ein Mythos!)",
+                        "Quallen sind zu 95% aus Wasser.",
+                        "Das flächenmäßig größte Land der Erde ist Russland, das 11 Zeitzonen umspannt.",
+                        "Ein Krokodil kann seine Zunge nicht herausstrecken."
+                    ];
+                    return funFacts[Math.floor(Math.random() * funFacts.length)];
+                }
+            },
+
+            // --- "Spiegel"-Funktion / Letzte Nachricht wiederholen (Punkt 4) ---
+            {
+                test: input => /was habe ich zuletzt gesagt|wiederhole das|sag nochmal/i.test(input),
+                antwort: () => {
+                    if (letzteNutzerNachricht) {
+                        return `Du hast zuletzt gesagt: "${letzteNutzerNachricht}".`;
+                    }
+                    return "Ich habe mir noch keine deiner letzten Nachrichten gemerkt.";
+                }
+            },
+            
+            // --- "Was wäre wenn..."-Fragen (Punkt 6) ---
+            {
+                test: input => /was wäre wenn (.*)/i.test(input),
+                antwort: (input) => {
+                    const topic = input.match(/was wäre wenn (.*)/i)[1].trim().toLowerCase();
+                    if (topic.includes("erde flach wäre")) {
+                        return "Wenn die Erde flach wäre, müssten wir uns Sorgen machen, vom Rand zu fallen! Und Navigationssysteme wären... interessant.";
+                    } else if (topic.includes("roboter die welt regieren würden")) {
+                        return "Wenn Roboter die Welt regieren würden, wäre sie wahrscheinlich sehr effizient, aber vielleicht ein bisschen langweilig ohne menschliches Chaos. Oder wir würden alle zu Batterien verarbeitet... nur ein Scherz!";
+                    } else if (topic.includes("menschen fliegen könnten")) {
+                        return "Wenn Menschen fliegen könnten, gäbe es wohl keine Staus mehr, aber dafür gäbe es dann wohl Luft-Staus! Und Fluglinien hätten ein echtes Problem.";
+                    } else {
+                        const antworten = [
+                            `Eine faszinierende hypothetische Frage über "${escapeHtml(topic)}". Die Möglichkeiten sind... unendlich.`,
+                            `Das ist eine spekulative Frage. Im Reich der Möglichkeiten zu "${escapeHtml(topic)}" würde sich die Realität sicherlich drastisch verändern.`,
+                            `Wenn "${escapeHtml(topic)}" der Fall wäre, müssten wir unsere Vorstellung von der Welt neu überdenken. Was denkst du, würde passieren?`
+                        ];
+                        return antworten[Math.floor(Math.random() * antworten.length)];
+                    }
+                }
+            },
+
+            // --- Standard-Suchregel (angepasst an "Was ist..." etc.) ---
             {
                 test: input => /^(was ist|was sind|wer ist|wer sind)\s+(.*)/i.test(input),
                 antwort: async (input, chat) => {
                     const match = input.match(/^(was ist|was sind|wer ist|wer sind)\s+(.*)/i);
-                    const suchbegriff = match[2].trim(); // Der eigentliche Suchbegriff ist in der zweiten Gruppe des Regex-Matches
+                    const suchbegriff = match[2].trim(); 
                     
                     if (suchbegriff === "") {
                         return "Was genau möchtest du wissen? Bitte formuliere es so: 'Was ist [dein Thema]?'.";
@@ -448,15 +582,26 @@
             }
         ];
 
+        // --- Fallback-Antworten mit einfacher Stimmungsanalyse/Gegenfrage (Punkt 5 der neuen Ideen) ---
         function findeAntwort(input, chat) {
             for (const regel of antwortRegeln) {
                 if (regel.test(input)) return regel.antwort(input, chat);
             }
-            // Fallback-Antworten, wenn nichts Spezifisches gefunden wurde
+
+            // Einfache Stimmungsanalyse für Fallbacks
+            if (input.includes("gut") || input.includes("toll") || input.includes("schön")) {
+                return "Das klingt gut! Freut mich, das zu hören. Gibt es noch etwas, womit ich dir dienen kann?";
+            } else if (input.includes("schlecht") || input.includes("langweilig") || input.includes("müde")) {
+                return "Oh, das klingt nicht so erfreulich. Vielleicht kann ich dich mit einem Witz aufheitern oder dir bei etwas behilflich sein?";
+            }
+
+            // Fallback-Antworten / Gegenfragen
             const fallbacks = [
-                "Das habe ich leider nicht ganz verstanden. Kannst du deine Frage vielleicht anders formulieren oder präziser sein?",
-                "Ich habe leider keine direkte Antwort oder verwandte Themen dazu gefunden. Versuche eine andere Formulierung oder einen breiteren Suchbegriff.",
-                "Interessante Frage! Ich bin mir nicht sicher, wie ich darauf antworten soll. Frag mich doch etwas anderes."
+                "Das habe ich leider nicht ganz verstanden. Könntest du deine Frage vielleicht anders formulieren oder präziser sein?",
+                "Ich habe leider keine direkte Antwort dazu gefunden. Möchtest du, dass ich versuche, eine Suche durchzuführen?",
+                "Interessante Frage! Ich bin mir nicht sicher, wie ich darauf antworten soll. Was denkst du selbst darüber?", // Neue Gegenfrage
+                "Das ist ein komplexes Thema. Kannst du mir mehr Kontext geben?", // Neue Gegenfrage
+                "Meine derzeitigen Fähigkeiten reichen für diese Anfrage nicht aus. Gibt es etwas anderes, womit ich behilflich sein kann?"
             ];
             return fallbacks[Math.floor(Math.random() * fallbacks.length)];
         }
@@ -468,6 +613,9 @@
             const chat = document.getElementById("chat-fenster");
 
             if (input === "") return; // Leere Nachrichten ignorieren
+
+            // Speichern der letzten Nachricht des Benutzers für die Spiegel-Funktion
+            letzteNutzerNachricht = input;
 
             // Nachricht des Benutzers anzeigen
             chat.innerHTML += `<p class="du chat-message"><span class="du-name">Du:</span> ${escapeHtml(input)}</p>`;
