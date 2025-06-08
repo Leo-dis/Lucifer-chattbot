@@ -182,6 +182,51 @@
                 antwort: () => "Das Technische Hilfswerk (THW) ist die Katastrophenschutzorganisation der Bundesrepublik Deutschland. Es ist einzigartig, da es hauptsächlich auf dem ehrenamtlichen Engagement seiner Mitglieder basiert. Die Aufgaben des THW sind vielfältig und reichen von der technischen Hilfe bei Naturkatastrophen wie Überschwemmungen und Erdbeben bis hin zu Bergungs- und Rettungseinsätzen. Sie unterstützen auch im Ausland bei humanitärer Hilfe. Ihre Arbeit ist entscheidend, um in Notlagen schnell und effektiv zu helfen und die Bevölkerung zu schützen."
             },
             {
+                // Neue Regel: Uhrzeit
+                test: input => /wie spät ist es|uhrzeit|wann ist es/i.test(input),
+                antwort: () => {
+                    // Verwende die aktuelle Uhrzeit in Bitburg, Rheinland-Pfalz, Deutschland (CEST)
+                    const now = new Date();
+                    const options = { 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        second: '2-digit', 
+                        hour12: false, // 24-Stunden-Format
+                        timeZone: 'Europe/Berlin' // Stellt sicher, dass die korrekte Zeitzone verwendet wird
+                    };
+                    const zeit = now.toLocaleTimeString('de-DE', options);
+                    return `Es ist jetzt ${zeit} Uhr.`;
+                }
+            },
+            {
+                // Neue Regel: Datum
+                test: input => /welches datum ist heute|datum/i.test(input),
+                antwort: () => {
+                    const now = new Date();
+                    const options = { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        timeZone: 'Europe/Berlin' // Stellt sicher, dass die korrekte Zeitzone verwendet wird
+                    };
+                    const datum = now.toLocaleDateString('de-DE', options);
+                    return `Heute ist der ${datum}.`;
+                }
+            },
+            {
+                // Neue Regel: Wetter (simuliert, da keine echte Wetter-API integriert ist)
+                test: input => /wie ist das wetter|wetter/i.test(input),
+                antwort: () => {
+                    const wetterOptionen = [
+                        "Aktuell sind keine Wetterdaten verfügbar, aber ich wünsche dir einen sonnigen Tag!",
+                        "Ich kann das Wetter nicht direkt überprüfen, aber schau doch mal aus dem Fenster! 😉",
+                        "Für präzise Wetterinformationen müsstest du eine Wetter-App oder -Webseite konsultieren, da ich keinen direkten Zugriff darauf habe."
+                    ];
+                    return wetterOptionen[Math.floor(Math.random() * wetterOptionen.length)];
+                }
+            },
+            {
                 test: input => /^(suche nach|finde|recherchiere)/i.test(input),
                 antwort: async (input, chat) => {
                     const suchbegriff = input.replace(/^(suche nach|finde|recherchiere)/i, '').trim();
