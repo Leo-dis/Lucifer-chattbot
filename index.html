@@ -125,6 +125,10 @@
     </div>
 
     <script>
+        // --- Datenstrukturen für neue Funktionen ---
+        let merkzettel = []; // Für Punkt 4 (Listen)
+        let erinnerungen = []; // Für Punkt 6 (Erinnerungen)
+
         // Hilfsfunktion für XSS-Prävention
         function escapeHtml(text) {
             const map = {
@@ -182,24 +186,21 @@
                 antwort: () => "Das Technische Hilfswerk (THW) ist die Katastrophenschutzorganisation der Bundesrepublik Deutschland. Es ist einzigartig, da es hauptsächlich auf dem ehrenamtlichen Engagement seiner Mitglieder basiert. Die Aufgaben des THW sind vielfältig und reichen von der technischen Hilfe bei Naturkatastrophen wie Überschwemmungen und Erdbeben bis hin zu Bergungs- und Rettungseinsätzen. Sie unterstützen auch im Ausland bei humanitärer Hilfe. Ihre Arbeit ist entscheidend, um in Notlagen schnell und effektiv zu helfen und die Bevölkerung zu schützen."
             },
             {
-                // Neue Regel: Uhrzeit
                 test: input => /wie spät ist es|uhrzeit|wann ist es/i.test(input),
                 antwort: () => {
-                    // Verwende die aktuelle Uhrzeit in Bitburg, Rheinland-Pfalz, Deutschland (CEST)
                     const now = new Date();
                     const options = { 
                         hour: '2-digit', 
                         minute: '2-digit', 
                         second: '2-digit', 
-                        hour12: false, // 24-Stunden-Format
-                        timeZone: 'Europe/Berlin' // Stellt sicher, dass die korrekte Zeitzone verwendet wird
+                        hour12: false, 
+                        timeZone: 'Europe/Berlin' 
                     };
                     const zeit = now.toLocaleTimeString('de-DE', options);
                     return `Es ist jetzt ${zeit} Uhr.`;
                 }
             },
             {
-                // Neue Regel: Datum
                 test: input => /welches datum ist heute|datum/i.test(input),
                 antwort: () => {
                     const now = new Date();
@@ -208,14 +209,13 @@
                         year: 'numeric', 
                         month: 'long', 
                         day: 'numeric',
-                        timeZone: 'Europe/Berlin' // Stellt sicher, dass die korrekte Zeitzone verwendet wird
+                        timeZone: 'Europe/Berlin' 
                     };
                     const datum = now.toLocaleDateString('de-DE', options);
                     return `Heute ist der ${datum}.`;
                 }
             },
             {
-                // Neue Regel: Wetter (simuliert, da keine echte Wetter-API integriert ist)
                 test: input => /wie ist das wetter|wetter/i.test(input),
                 antwort: () => {
                     const wetterOptionen = [
@@ -224,6 +224,183 @@
                         "Für präzise Wetterinformationen müsstest du eine Wetter-App oder -Webseite konsultieren, da ich keinen direkten Zugriff darauf habe."
                     ];
                     return wetterOptionen[Math.floor(Math.random() * wetterOptionen.length)];
+                }
+            },
+            // --- Neue Regeln für Rechenaufgaben (Punkt 3) ---
+            {
+                test: input => /was ist (\d+)\s*plus\s*(\d+)/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/was ist (\d+)\s*plus\s*(\d+)/i);
+                    const num1 = parseInt(match[1]);
+                    const num2 = parseInt(match[2]);
+                    return `${num1} + ${num2} = ${num1 + num2}`;
+                }
+            },
+            {
+                test: input => /was ist (\d+)\s*minus\s*(\d+)/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/was ist (\d+)\s*minus\s*(\d+)/i);
+                    const num1 = parseInt(match[1]);
+                    const num2 = parseInt(match[2]);
+                    return `${num1} - ${num2} = ${num1 - num2}`;
+                }
+            },
+            {
+                test: input => /was ist (\d+)\s*mal\s*(\d+)/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/was ist (\d+)\s*mal\s*(\d+)/i);
+                    const num1 = parseInt(match[1]);
+                    const num2 = parseInt(match[2]);
+                    return `${num1} * ${num2} = ${num1 * num2}`;
+                }
+            },
+            {
+                test: input => /was ist (\d+)\s*geteilt durch\s*(\d+)/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/was ist (\d+)\s*geteilt durch\s*(\d+)/i);
+                    const num1 = parseInt(match[1]);
+                    const num2 = parseInt(match[2]);
+                    if (num2 === 0) return "Man kann nicht durch Null teilen. Das führt zu... Nun, zu einem unendlichen Chaos.";
+                    return `${num1} / ${num2} = ${num1 / num2}`;
+                }
+            },
+            // --- Neue Regeln für Listen (Punkt 4) ---
+            {
+                test: input => /merke (.*)|füge (.*) zur liste hinzu/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/merke (.*)|füge (.*) zur liste hinzu/i);
+                    const item = (match[1] || match[2]).trim();
+                    if (item) {
+                        merkzettel.push(escapeHtml(item));
+                        return `Ich habe '${escapeHtml(item)}' auf deiner Merkliste notiert.`;
+                    }
+                    return "Was soll ich mir merken?";
+                }
+            },
+            {
+                test: input => /was hast du dir gemerkt|zeige mir meine liste|meine liste/i.test(input),
+                antwort: () => {
+                    if (merkzettel.length === 0) {
+                        return "Deine Merkliste ist leer. Sag mir 'Merke [Ding]', um etwas hinzuzufügen.";
+                    }
+                    let liste = "Hier ist, was ich mir gemerkt habe:<br><ul>";
+                    merkzettel.forEach((item, index) => {
+                        liste += `<li>${index + 1}. ${item}</li>`;
+                    });
+                    liste += "</ul>";
+                    return liste;
+                }
+            },
+            {
+                test: input => /lösche (alles von der liste|die liste)|leere merkliste/i.test(input),
+                antwort: () => {
+                    if (merkzettel.length > 0) {
+                        merkzettel = [];
+                        return "Ich habe deine Merkliste geleert.";
+                    }
+                    return "Deine Merkliste ist bereits leer.";
+                }
+            },
+            // --- Neue Regeln für Countdown (Punkt 5) ---
+            {
+                test: input => /countdown zu (\d{1,2})\.(\d{1,2})\.(\d{4})/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/countdown zu (\d{1,2})\.(\d{1,2})\.(\d{4})/i);
+                    const day = parseInt(match[1]);
+                    const month = parseInt(match[2]) - 1; // Monate sind 0-indiziert
+                    const year = parseInt(match[3]);
+
+                    const targetDate = new Date(year, month, day);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0); // Setze Zeit auf Mitternacht für genaue Tagesberechnung
+
+                    if (isNaN(targetDate.getTime())) {
+                        return "Das ist kein gültiges Datum. Bitte verwende das Format TT.MM.JJJJ, z.B. 'Countdown zu 24.12.2025'.";
+                    }
+                    
+                    const diffTime = targetDate.getTime() - today.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays < 0) {
+                        return "Dieses Datum liegt in der Vergangenheit. Wünschst du einen Countdown für die Zukunft?";
+                    } else if (diffDays === 0) {
+                        return "Heute ist der große Tag! Herzlichen Glückwunsch oder viel Erfolg!";
+                    } else if (diffDays === 1) {
+                        return "Es ist nur noch 1 Tag bis zum " + targetDate.toLocaleDateString('de-DE') + "!";
+                    } else {
+                        return `Es sind noch ${diffDays} Tage bis zum ${targetDate.toLocaleDateString('de-DE')}.`;
+                    }
+                }
+            },
+            // --- Neue Regeln für Erinnerungen (Punkt 6) ---
+            {
+                test: input => /erinnere mich an (.*) am (\d{1,2})\.(\d{1,2})\.(\d{4})( um (\d{1,2}:\d{2}))?/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/erinnere mich an (.*) am (\d{1,2})\.(\d{1,2})\.(\d{4})( um (\d{1,2}:\d{2}))?/i);
+                    const what = match[1].trim();
+                    const day = parseInt(match[2]);
+                    const month = parseInt(match[3]) - 1;
+                    const year = parseInt(match[4]);
+                    const time = match[6] ? match[6].trim() : '00:00'; // Standardzeit, wenn keine angegeben
+
+                    const [hour, minute] = time.split(':').map(Number);
+                    const reminderDate = new Date(year, month, day, hour, minute);
+
+                    if (isNaN(reminderDate.getTime())) {
+                        return "Das ist kein gültiges Datum oder Uhrzeit. Bitte verwende 'Erinnere mich an [was] am TT.MM.JJJJ um HH:MM'.";
+                    }
+
+                    const now = new Date();
+                    if (reminderDate <= now) {
+                        return "Dieses Datum/Uhrzeit liegt in der Vergangenheit. Ich kann dich leider nicht an etwas erinnern, das schon vorbei ist.";
+                    }
+
+                    erinnerungen.push({
+                        what: escapeHtml(what),
+                        date: reminderDate
+                    });
+                    
+                    // Optional: Sortieren nach Datum
+                    erinnerungen.sort((a, b) => a.date - b.date);
+
+                    return `Ich werde dich am ${reminderDate.toLocaleDateString('de-DE')} um ${reminderDate.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'})} an '${escapeHtml(what)}' erinnern.`;
+                }
+            },
+            {
+                test: input => /was muss ich mir merken|zeige mir meine erinnerungen/i.test(input),
+                antwort: () => {
+                    if (erinnerungen.length === 0) {
+                        return "Du hast keine Erinnerungen bei mir gespeichert. Sag 'Erinnere mich an [was] am TT.MM.JJJJ um HH:MM'.";
+                    }
+                    let liste = "Hier sind deine gespeicherten Erinnerungen:<br><ul>";
+                    erinnerungen.forEach((erinnerung, index) => {
+                        liste += `<li>${index + 1}. "${erinnerung.what}" am ${erinnerung.date.toLocaleDateString('de-DE')} um ${erinnerung.date.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'})}</li>`;
+                    });
+                    liste += "</ul>";
+                    return liste;
+                }
+            },
+            {
+                test: input => /lösche erinnerung (\d+)|lösche alle erinnerungen/i.test(input),
+                antwort: (input) => {
+                    const match = input.match(/lösche erinnerung (\d+)/i);
+                    if (match) {
+                        const index = parseInt(match[1]) - 1; // 0-indiziert
+                        if (index >= 0 && index < erinnerungen.length) {
+                            const gelöscht = erinnerungen.splice(index, 1);
+                            return `Erinnerung "${gelöscht[0].what}" wurde gelöscht.`;
+                        } else {
+                            return "Diese Erinnerung existiert nicht. Bitte gib die Nummer aus 'zeige mir meine Erinnerungen' an.";
+                        }
+                    } else if (/lösche alle erinnerungen/i.test(input)) {
+                        if (erinnerungen.length > 0) {
+                            erinnerungen = [];
+                            return "Alle Erinnerungen wurden gelöscht.";
+                        } else {
+                            return "Es sind keine Erinnerungen gespeichert.";
+                        }
+                    }
+                    return "Ich habe nicht verstanden, welche Erinnerung gelöscht werden soll. Sag 'lösche Erinnerung [Nummer]' oder 'lösche alle Erinnerungen'.";
                 }
             },
             {
