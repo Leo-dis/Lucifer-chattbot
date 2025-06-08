@@ -226,7 +226,7 @@
                     return wetterOptionen[Math.floor(Math.random() * wetterOptionen.length)];
                 }
             },
-            // --- Neue Regeln für Rechenaufgaben (Punkt 3) ---
+            // --- Rechenaufgaben ---
             {
                 test: input => /was ist (\d+)\s*plus\s*(\d+)/i.test(input),
                 antwort: (input) => {
@@ -264,7 +264,7 @@
                     return `${num1} / ${num2} = ${num1 / num2}`;
                 }
             },
-            // --- Neue Regeln für Listen (Punkt 4) ---
+            // --- Listen ---
             {
                 test: input => /merke (.*)|füge (.*) zur liste hinzu/i.test(input),
                 antwort: (input) => {
@@ -301,7 +301,7 @@
                     return "Deine Merkliste ist bereits leer.";
                 }
             },
-            // --- Neue Regeln für Countdown (Punkt 5) ---
+            // --- Countdown ---
             {
                 test: input => /countdown zu (\d{1,2})\.(\d{1,2})\.(\d{4})/i.test(input),
                 antwort: (input) => {
@@ -332,7 +332,7 @@
                     }
                 }
             },
-            // --- Neue Regeln für Erinnerungen (Punkt 6) ---
+            // --- Erinnerungen ---
             {
                 test: input => /erinnere mich an (.*) am (\d{1,2})\.(\d{1,2})\.(\d{4})( um (\d{1,2}:\d{2}))?/i.test(input),
                 antwort: (input) => {
@@ -403,12 +403,15 @@
                     return "Ich habe nicht verstanden, welche Erinnerung gelöscht werden soll. Sag 'lösche Erinnerung [Nummer]' oder 'lösche alle Erinnerungen'.";
                 }
             },
+            // --- Angepasste Suchregel (NEU!) ---
             {
-                test: input => /^(suche nach|finde|recherchiere)/i.test(input),
+                test: input => /^(was ist|was sind|wer ist|wer sind)\s+(.*)/i.test(input),
                 antwort: async (input, chat) => {
-                    const suchbegriff = input.replace(/^(suche nach|finde|recherchiere)/i, '').trim();
+                    const match = input.match(/^(was ist|was sind|wer ist|wer sind)\s+(.*)/i);
+                    const suchbegriff = match[2].trim(); // Der eigentliche Suchbegriff ist in der zweiten Gruppe des Regex-Matches
+                    
                     if (suchbegriff === "") {
-                        return "Was genau soll ich suchen? Bitte formuliere es so: 'Suche nach [dein Thema]'.";
+                        return "Was genau möchtest du wissen? Bitte formuliere es so: 'Was ist [dein Thema]?'.";
                     }
                     const loadingId = 'loading-' + Date.now();
                     chat.innerHTML += `<p class="lucifer chat-message" id="${loadingId}"><span class="lucifer-name">Lucifer:</span> Ich überlege gerade...</p>`;
@@ -452,8 +455,8 @@
             // Fallback-Antworten, wenn nichts Spezifisches gefunden wurde
             const fallbacks = [
                 "Das habe ich leider nicht ganz verstanden. Kannst du deine Frage vielleicht anders formulieren oder präziser sein?",
-                "Meine Datenbank gibt zu dieser Anfrage leider nichts her. Möchtest du, dass ich stattdessen versuche, eine Suche durchzuführen? Sag einfach 'Suche nach [dein Thema]'.",
-                "Interessante Frage! Ich bin mir nicht sicher, wie ich darauf antworten soll. Frag mich doch etwas anderes oder bitte mich, etwas Bestimmtes zu suchen."
+                "Ich habe leider keine direkte Antwort oder verwandte Themen dazu gefunden. Versuche eine andere Formulierung oder einen breiteren Suchbegriff.",
+                "Interessante Frage! Ich bin mir nicht sicher, wie ich darauf antworten soll. Frag mich doch etwas anderes."
             ];
             return fallbacks[Math.floor(Math.random() * fallbacks.length)];
         }
