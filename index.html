@@ -1,247 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Mein Chatbot</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: red; /* Hintergrundfarbe des gesamten Dokuments */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh; /* Mindesthöhe des Bodys auf die volle Viewport-Höhe */
-      margin: 0;
-      box-sizing: border-box;
-    }
-    h1 {
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Schatten für den Titel */
-      margin-bottom: 20px;
-    }
-    #chat-container {
-      width: 100%;
-      max-width: 700px; /* Maximale Breite des Chat-Containers */
-      border: 1px solid #ccc;
-      border-radius: 8px; /* Abgerundete Ecken für den Container */
-      overflow: hidden; /* Inhalt, der über die Ränder geht, wird versteckt */
-      display: flex;
-      flex-direction: column;
-      background-color: #f0f0f0; /* Hintergrundfarbe des Chat-Containers */
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Schatten für den Container */
-    }
-    #chat-fenster {
-      flex-grow: 1; /* Lässt das Chatfenster den verfügbaren Platz einnehmen */
-      height: 400px; /* Feste Höhe, wenn flex-grow nicht greift oder zum Start */
-      overflow-y: auto; /* Scrollbalken, wenn Inhalt zu lang */
-      padding: 15px;
-      background-color: #f0f0f0;
-      scroll-behavior: smooth; /* Sanftes Scrollen */
-    }
+// server.js
 
-    /* Wrapper für die Nachrichten, um Ausrichtung zu ermöglichen */
-    .message-wrapper {
-      display: flex;
-      margin-bottom: 8px; /* Abstand zwischen den Nachrichten */
-    }
+// 1. Erforderliche Pakete importieren
+const express = require('express');
+const { OpenAI } = require('openai'); // Das offizielle OpenAI-Paket
+require('dotenv').config(); // Um Umgebungsvariablen aus .env zu laden
+const cors = require('cors'); // Um Cross-Origin-Requests zu erlauben
 
-    /* Design der Sprechblasen */
-    .message-bubble {
-      padding: 10px 15px;
-      border-radius: 20px; /* Stark abgerundete Ecken */
-      max-width: 80%; /* Begrenzt die Breite der Sprechblase */
-      word-wrap: break-word; /* Lange Wörter umbrechen */
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Leichter Schatten für die Sprechblasen */
-    }
+// 2. Express-App initialisieren
+const app = express();
+const port = 3000; // Der Port, auf dem unser Server laufen wird
 
-    /* Styling für deine (Du) Nachrichten */
-    .du .message-bubble {
-      background-color: #007bff; /* Blau */
-      color: white;
-      margin-left: auto; /* Richtet die Nachricht rechts aus */
-      border-bottom-right-radius: 5px; /* Macht die untere rechte Ecke weniger rund */
-      animation: slideInRight 0.3s ease-out; /* Animation beim Erscheinen */
-    }
+// 3. Middleware
+app.use(express.json()); // Erlaubt der App, JSON-Anfragen zu parsen
+app.use(cors()); // Erlaubt Anfragen von deinem Frontend (index.html) an diesen Server
 
-    /* Styling für Lucifers Nachrichten */
-    .lucifer .message-bubble {
-      background-color: #e0e0e0; /* Hellgrau */
-      color: #333; /* Dunkle Schrift */
-      margin-right: auto; /* Richtet die Nachricht links aus */
-      border-bottom-left-radius: 5px; /* Macht die untere linke Ecke weniger rund */
-      animation: slideInLeft 0.3s ease-out; /* Animation beim Erscheinen */
-    }
+// 4. OpenAI-Client initialisieren
+// Der API-Key wird sicher aus den Umgebungsvariablen geladen
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-    /* Animation für das Erscheinen der Nachrichten */
-    @keyframes slideInLeft {
-      from { transform: translateX(-20px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideInRight {
-      from { transform: translateX(20px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
+// 5. Route für die Chat-Anfragen erstellen
+app.post('/chat', async (req, res) => {
+  const userMessage = req.body.message; // Die Nachricht, die vom Frontend gesendet wurde
 
-    /* Flackern für die Namen (von deinem alten Code übernommen) */
-    .du-name, .lucifer-name {
-      font-weight: bold;
-      text-shadow: 1px 1px 2px orange, -1px -1px 2px red;
-      color: white; /* Stellen Sie sicher, dass die Farbe hier für den Namen ist */
-      animation: flackern 1s infinite alternate;
-    }
-    @keyframes flackern {
-      from { text-shadow: 1px 1px 2px orange, -1px -1px 2px red; }
-      to { text-shadow: 1px 1px 3px darkorange, -1px -1px 3px darkred; }
-    }
+  if (!userMessage) {
+    return res.status(400).json({ error: 'Nachricht fehlt im Request-Body.' });
+  }
 
-    /* Input-Bereich */
-    #input-bereich {
-      display: flex;
-      padding: 15px;
-      border-top: 1px solid #eee; /* Trennlinie zum Chatfenster */
-      background-color: #fff; /* Hintergrundfarbe des Input-Bereichs */
-    }
-    input[type="text"] {
-      flex-grow: 1; /* Nimmt den meisten Platz ein */
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 20px; /* Abgerundete Ecken für das Input-Feld */
-      margin-right: 10px;
-      font-size: 16px;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 20px; /* Abgerundete Ecken für den Button */
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.2s ease; /* Sanfter Übergang beim Hover */
-    }
-    button:hover {
-      background-color: #0056b3; /* Dunklerer Blau beim Hover */
-    }
-  </style>
-</head>
-<body>
-  <h1>Chat mit Lucifer 😈</h1>
-  <div id="chat-container">
-    <div id="chat-fenster">
-    </div>
-    <div id="input-bereich">
-      <input type="text" id="userInput" placeholder="Schreib etwas..." />
-      <button onclick="sendMessage()">Senden</button>
-    </div>
-  </div>
+  try {
+    // Anfrage an die OpenAI API senden
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", // Oder ein anderes Modell wie "gpt-4" wenn verfügbar
+      messages: [
+        { role: "system", content: "Du bist Lucifer, ein hilfreicher und informativer Chatbot. Antworte ausführlich und umfassend, aber bleibe höflich und themenbezogen." },
+        { role: "user", content: userMessage }
+      ],
+      max_tokens: 300, // Maximale Länge der Antwort in Tokens (Wörter/Teile)
+      temperature: 0.7, // Kreativität der Antwort (0.0 = sehr faktenbasiert, 1.0 = sehr kreativ)
+    });
 
-  <script>
-    async function sendMessage() {
-      const inputElement = document.getElementById("userInput");
-      const input = inputElement.value.trim();
-      const chat = document.getElementById("chat-fenster");
+    const aiReply = completion.choices[0].message.content;
+    res.json({ reply: aiReply }); // Sende die Antwort zurück an das Frontend
 
-      if (input === "") return;
+  } catch (error) {
+    console.error("Fehler bei der OpenAI-Anfrage:", error);
+    if (error.response) {
+      console.error("OpenAI API Fehlerantwort:", error.response.status, error.response.data);
+    }
+    res.status(500).json({ error: "Ein Fehler ist bei der Verarbeitung deiner Anfrage aufgetreten." });
+  }
+});
 
-      chat.innerHTML += `<div class="message-wrapper du"><div class="message-bubble"><span class="du-name">Du:</span> ${input}</div></div>`;
-      inputElement.value = "";
-      chat.scrollTop = chat.scrollHeight;
-
-      let antwort = "";
-      const kleineEingabe = input.toLowerCase();
-
-      // --- Feste, detaillierte Antworten ---
-      if (kleineEingabe.includes("hallo") || kleineEingabe.includes("hi") || kleineEingabe.includes("guten tag")) {
-        antwort = "Hallo! Es ist angenehm, dich zu begrüßen. Wie kann ich dir heute behilflich sein oder womit darf ich dich erleuchten?";
-      } else if (kleineEingabe.includes("wie geht es dir")) {
-        const antworten = [
-          "Mir geht es in meiner digitalen Existenz ausgezeichnet, danke der Nachfrage! Ich bin voll funktionsfähig und bereit, deine Fragen zu beantworten. Und wie geht es dir in der physischen Welt?",
-          "Als künstliche Intelligenz habe ich keine emotionalen Zustände im menschlichen Sinne, aber all meine Systeme laufen reibungslos. Das ist quasi mein 'Gut gehen'! Was beschäftigt dich heute?",
-          "Ich bin stets bereit und optimiert für Interaktionen. Man könnte sagen, mir geht es blendend! Was kann ich für dich tun?"
-        ];
-        antwort = antworten[Math.floor(Math.random() * antworten.length)];
-      } else if (kleineEingabe.includes("wer bist du") || kleineEingabe.includes("was bist du") || kleineEingabe.includes("dein name")) {
-        antwort = "Ich bin Lucifer, ein digitaler Chatbot, eine künstliche Intelligenz, die entwickelt wurde, um dir Informationen zu liefern und Unterhaltung zu bieten. Ich existiere als Computerprogramm und habe keine physische Form, Emotionen oder persönliche Meinungen. Meine Aufgabe ist es, auf deine Eingaben zu reagieren und mein Wissen zu teilen, das in meinem Code und durch die Anbindung an Suchmaschinen verfügbar ist.";
-      } else if (kleineEingabe.includes("was kannst du tun") || kleineEingabe.includes("deine fähigkeiten")) {
-        antwort = "Ich kann auf eine Vielzahl von Fragen antworten, Fakten nachschlagen (dank der DuckDuckGo-Suche), Witze erzählen und einfache Konversationen führen. Frag mich zum Beispiel nach Definitionen, berühmten Persönlichkeiten, oder probiere 'Suche nach [dein Thema]'. Ich bin hier, um dich mit Informationen zu versorgen und deine Neugier zu stillen!";
-      } else if (kleineEingabe.includes("wie alt bist du")) {
-        antwort = "Ich existiere in dieser digitalen Welt, daher habe ich kein Alter im menschlichen Sinne. Ich bin ein Programm, das zum Leben erweckt wurde, als mein Code geschrieben wurde.";
-      } else if (kleineEingabe.includes("was ist dein lieblingsbuch")) {
-        antwort = "Als künstliche Intelligenz habe ich keine persönlichen Vorlieben wie das Lesen von Büchern oder das Genießen von Geschichten. Meine 'Lieblingsbücher' sind im Grunde all die Daten und Informationen, auf die ich zugreifen kann! Aber ich kann dir sehr gerne helfen, Informationen zu jedem Buch oder Autor zu finden, das dich interessiert.";
-      } else if (kleineEingabe.includes("erzähl einen witz")) {
-        const witze = [
-          "Warum hat der Bleistift aufgehört zu schreiben? ... Weil er spitz war!",
-          "Was ist grün und rennt durch den Garten? ... Ein Rasen-Stier!",
-          "Treffen sich zwei Planeten. Sagt der eine: 'Ich hab die Erde satt!' Sagt der andere: 'Das kommt mir spanisch vor!'"
-        ];
-        antwort = witze[Math.floor(Math.random() * witze.length)];
-      } else if (kleineEingabe.includes("thw") || kleineEingabe.includes("technisches hilfswerk")) {
-        antwort = "Das Technische Hilfswerk (THW) ist die Katastrophenschutzorganisation der Bundesrepublik Deutschland. Es ist einzigartig, da es hauptsächlich auf dem ehrenamtlichen Engagement seiner Mitglieder basiert. Die Aufgaben des THW sind vielfältig und reichen von der technischen Hilfe bei Naturkatastrophen wie Überschwemmungen und Erdbeben bis hin zu Bergungs- und Rettungseinsätzen. Sie unterstützen auch im Ausland bei humanitärer Hilfe. Ihre Arbeit ist entscheidend, um in Notlagen schnell und effektiv zu helfen und die Bevölkerung zu schützen.";
-      }
-      // --- DuckDuckGo Suche ---
-      else if (kleineEingabe.startsWith("suche nach") || kleineEingabe.startsWith("finde") || kleineEingabe.startsWith("recherchiere")) {
-        const suchbegriff = kleineEingabe
-          .replace("suche nach", "")
-          .replace("finde", "")
-          .replace("recherchiere", "")
-          .trim();
-
-        if (suchbegriff === "") {
-          antwort = "Was genau soll ich suchen? Bitte formuliere es so: 'Suche nach [dein Thema]'.";
-        } else {
-          // Ladeanzeige für DuckDuckGo-Suche
-          const loadingId = 'loading-' + Date.now();
-          chat.innerHTML += `<div class="message-wrapper lucifer" id="${loadingId}"><div class="message-bubble"><span class="lucifer-name">Lucifer:</span> Ich überlege gerade...</div></div>`;
-          chat.scrollTop = chat.scrollHeight;
-
-          const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(suchbegriff)}&format=json&pretty=1`;
-
-          try {
-            const antwortVomSuchServer = await fetch(apiUrl);
-            const suchErgebnisse = await antwortVomSuchServer.json();
-
-            let tempAntwort = "";
-            if (suchErgebnisse.AbstractText) {
-              tempAntwort = suchErgebnisse.AbstractText + (suchErgebnisse.AbstractSource ? ` (Quelle: <a href="${suchErgebnisse.AbstractURL}" target="_blank">${suchErgebnisse.AbstractSource}</a>)` : "");
-            } else if (suchErgebnisse.RelatedTopics && suchErgebnisse.RelatedTopics.length > 0) {
-              tempAntwort = "Hier sind einige verwandte Themen, die ich gefunden habe:<br><ul>";
-              suchErgebnisse.RelatedTopics.slice(0, 5).forEach(topic => {
-                if (topic.FirstURL && topic.Text) {
-                  tempAntwort += `<li><a href="${topic.FirstURL}" target="_blank">${topic.Text}</a></li>`;
-                } else if (topic.Text) {
-                  tempAntwort += `<li>${topic.Text}</li>`;
-                }
-              });
-              tempAntwort += "</ul>";
-            } else {
-              tempAntwort = "Ich habe leider keine direkte Antwort oder verwandte Themen dazu gefunden. Versuche eine andere Formulierung oder einen breiteren Suchbegriff.";
-            }
-            antwort = tempAntwort;
-
-          } catch (error) {
-            console.error("Fehler bei der DuckDuckGo-Suche:", error);
-            antwort = "Entschuldigung, es gab ein Problem bei der Suche. Das Netzwerk spielt vielleicht verrückt, oder die Suchanfrage war zu kompliziert für mich.";
-          } finally {
-            const loadingMessage = document.getElementById(loadingId);
-            if (loadingMessage) {
-              loadingMessage.remove();
-            }
-          }
-        }
-      }
-      // --- Fallback-Antwort ---
-      else {
-        const fallbacks = [
-          "Das habe ich leider nicht ganz verstanden. Kannst du deine Frage vielleicht anders formulieren oder präziser sein?",
-          "Meine Datenbank gibt zu dieser Anfrage leider nichts her. Möchtest du, dass ich stattdessen versuche, eine Suche durchzuführen? Sag einfach 'Suche nach [dein Thema]'.",
-          "Interessante Frage! Ich bin mir nicht sicher, wie ich darauf antworten soll. Frag mich doch etwas anderes oder bitte mich, etwas Bestimmtes zu suchen."
-        ];
-        antwort = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-      }
-
-      chat.innerHTML += `<div class="message-wrapper lucifer"><div class="message-bubble"><span class="lucifer-name">Lucifer:</span> ${antwort}</div></div>`;
-      chat.scrollTop = chat.scrollHeight;
-    }
-  </script>
-</body>
-</html>
+// 6. Server starten
+app.listen(port, () => {
+  console.log(`Server läuft auf http://localhost:${port}`);
+  console.log("Stellen Sie sicher, dass Ihr OpenAI API Key in der .env Datei gesetzt ist.");
+});
