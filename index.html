@@ -8,96 +8,89 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background-color: #1a1a1a; /* Dunkelgrauer/schwarzer Hintergrund */
-      color: #f0f0f0; /* Helle Schriftfarbe für den Body-Text */
+      background-color: red; /* Hintergrundfarbe des gesamten Dokuments */
       display: flex;
       flex-direction: column;
-      align-items: center; /* Zentriert den Inhalt horizontal */
-      min-height: 100vh;
+      align-items: center;
+      min-height: 100vh; /* Mindesthöhe des Bodys auf die volle Viewport-Höhe */
       margin: 0;
       box-sizing: border-box;
     }
     h1 {
       color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Schatten für den Titel */
       margin-bottom: 20px;
     }
     #chat-container {
       width: 100%;
-      max-width: 700px;
-      border: 1px solid #333; /* Dunklerer Rand */
-      border-radius: 8px;
-      overflow: hidden;
+      max-width: 700px; /* Maximale Breite des Chat-Containers */
+      border: 1px solid #ccc;
+      border-radius: 8px; /* Abgerundete Ecken für den Container */
+      overflow: hidden; /* Inhalt, der über die Ränder geht, wird versteckt */
       display: flex;
       flex-direction: column;
-      background-color: #2b2b2b; /* Dunklerer Hintergrund für den Chat-Container */
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5); /* Stärkerer Schatten */
+      background-color: #f0f0f0; /* Hintergrundfarbe des Chat-Containers */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Schatten für den Container */
     }
     #chat-fenster {
-      flex-grow: 1;
-      height: 400px;
-      overflow-y: auto;
+      flex-grow: 1; /* Lässt das Chatfenster den verfügbaren Platz einnehmen */
+      height: 400px; /* Feste Höhe, wenn flex-grow nicht greift oder zum Start */
+      overflow-y: auto; /* Scrollbalken, wenn Inhalt zu lang */
       padding: 15px;
-      background-color: #2b2b2b; /* Gleicher Hintergrund wie Container */
-      scroll-behavior: smooth;
-      color: #e0e0e0; /* Helle Schriftfarbe im Chatfenster */
+      background-color: #f0f0f0;
+      scroll-behavior: smooth; /* Sanftes Scrollen */
     }
 
-    /* Nachrichten-Styling im alten Design, aber mit dunklem Hintergrund */
+    /* Nachrichten-Styling im alten Design */
     .chat-message {
       margin-bottom: 10px;
       line-height: 1.5;
     }
     .du {
-      color: #66b3ff; /* Hellblau für deine Nachrichten */
+      color: blue;
     }
     .lucifer {
-      color: #7acc7a; /* Helles Grün für Lucifers Nachrichten */
+      color: green;
     }
 
-    /* Flackern für die Namen beibehalten, Farben angepasst */
+    /* Flackern für die Namen (von deinem alten Code übernommen) */
     .du-name, .lucifer-name {
       font-weight: bold;
-      text-shadow: 1px 1px 2px #ff8c00, -1px -1px 2px #ff4500; /* Orange/Rot-Schatten */
+      text-shadow: 1px 1px 2px orange, -1px -1px 2px red;
       animation: flackern 1s infinite alternate;
     }
     @keyframes flackern {
-      from { text-shadow: 1px 1px 2px #ff8c00, -1px -1px 2px #ff4500; }
-      to { text-shadow: 1px 1px 3px #ffa500, -1px -1px 3px #dc143c; }
+      from { text-shadow: 1px 1px 2px orange, -1px -1px 2px red; }
+      to { text-shadow: 1px 1px 3px darkorange, -1px -1px 3px darkred; }
     }
 
     /* Input-Bereich */
     #input-bereich {
       display: flex;
       padding: 15px;
-      border-top: 1px solid #444; /* Dunklere Trennlinie */
-      background-color: #3a3a3a; /* Dunklerer Hintergrund für den Input-Bereich */
+      border-top: 1px solid #eee; /* Trennlinie zum Chatfenster */
+      background-color: #fff; /* Hintergrundfarbe des Input-Bereichs */
     }
     input[type="text"] {
-      flex-grow: 1;
+      flex-grow: 1; /* Nimmt den meisten Platz ein */
       padding: 10px;
-      border: 1px solid #555; /* Dunklerer Rand */
-      border-radius: 20px;
+      border: 1px solid #ccc;
+      border-radius: 20px; /* Abgerundete Ecken für das Input-Feld */
       margin-right: 10px;
       font-size: 16px;
-      background-color: #444; /* Dunkleres Input-Feld */
-      color: #f0f0f0; /* Helle Schriftfarbe im Input-Feld */
-    }
-    input[type="text"]::placeholder {
-      color: #bbb; /* Helle Farbe für den Placeholder-Text */
     }
     button {
       padding: 10px 20px;
-      background-color: #8a2be2; /* Lila Button, passend zum dunklen Thema */
+      background-color: #007bff;
       color: white;
       border: none;
-      border-radius: 20px;
+      border-radius: 20px; /* Abgerundete Ecken für den Button */
       cursor: pointer;
       font-size: 16px;
-      transition: background-color 0.2s ease;
+      transition: background-color 0.2s ease; /* Sanfter Übergang beim Hover */
     }
     button:hover {
-      background-color: #6a00cd; /* Dunkleres Lila beim Hover */
+      background-color: #0056b3; /* Dunklerer Blau beim Hover */
     }
 
     /* Responsives Design für kleinere Bildschirme */
@@ -106,7 +99,7 @@
         max-width: 98vw; /* Nutzt fast die gesamte Breite des Viewports */
       }
       #chat-fenster {
-        height: 60vh; /* Nimmt mehr Platz auf dem Handy ein, um Zoomen zu vermeiden */
+        height: 50vh; /* Nimmt 50% der Viewport-Höhe ein */
       }
       body {
         padding: 10px; /* Weniger Padding am Rand */
